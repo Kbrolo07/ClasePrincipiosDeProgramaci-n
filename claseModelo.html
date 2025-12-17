@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principios de Programación: Clase Modelo Final</title>
+    
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    
+    <style>
+        /* Estilos Base y Animación Dinámica */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Roboto+Mono:wght{400;700}&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            overflow: hidden; 
+            
+            /* Fondo Gradiente Animado */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient-background 15s ease infinite;
+        }
+
+        @keyframes gradient-background {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Animación de Borde Pulsante (MEJORA DINÁMICA JS/CSS) */
+        @keyframes glowing-border {
+            0% { box-shadow: 0 0 10px rgba(0, 123, 255, 0.4), 0 20px 50px rgba(0, 0, 0, 0.3); }
+            50% { box-shadow: 0 0 25px #e73c7e, 0 20px 50px rgba(0, 0, 0, 0.4); } /* Usa un color del fondo (e73c7e) */
+            100% { box-shadow: 0 0 10px rgba(0, 123, 255, 0.4), 0 20px 50px rgba(0, 0, 0, 0.3); }
+        }
+
+        #presentation-container {
+            width: 95%; 
+            max-width: 1400px; 
+            height: 85vh; 
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            /* COMBINACIÓN DE SOMBRA CLÁSICA CON LA ANIMACIÓN GLOW */
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden; 
+            animation: glowing-border 5s ease-in-out infinite alternate; 
+        }
+
+        /* Títulos (MEJORA DE DISEÑO H1/H2) */
+        h1 {
+            font-size: 3.5em; 
+            color: #e73c7e; /* Color más vibrante de la paleta del fondo */
+            margin-bottom: 10px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* --- Estilos de Slide y Contenido --- */
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 50px 60px; 
+            box-sizing: border-box;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.7s ease-in-out, transform 0.7s ease-in-out;
+            transform: translateX(100%); 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        /* Indicador de Tiempo */
+        .slide::before {
+            content: attr(data-time);
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #007bff;
+            background: #e9f7fe;
+            padding: 8px 15px;
+            border-radius: 10px;
+            z-index: 10;
+        }
+        #slide1::before { content: none; }
+
+        /* Centrar contenido en slides específicas */
+        #slide1, #slide2, #slide_conclusion, #slide_references, #slide_syntax_intro, #slide_algoritmo_intro, #slide_algoritmo_ejemplo, #slide_algoritmo_interact, #slide20_reto, #slide22_programar {
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0%);
+        }
+
+        .slide.prev-exit {
+            transform: translateX(-100%); 
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Modificación de H2 (MEJORA DE DISEÑO H1/H2) */
+        h2 {
+            font-size: 2.2em; 
+            color: #343a40;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1); /* Sombra sutil para distinción */
+        }
+
+        h3 {
+            font-size: 1.7em;
+            color: #495057;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.25em; 
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+        
+        /* Nuevo estilo para la caja de analogía (MEJORA DE DISEÑO CAJAS) */
+        .analogy-box {
+            margin-top: 15px;
+            padding: 20px;
+            background-color: #e6ffec; /* Verde menta suave */
+            border: 1px solid #28a745;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 650px;
+            align-self: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            text-align: center; /* Asegurar centrado del contenido interno */
+        }
+        .analogy-box h3 {
+            color: #28a745; /* Hacer el título verde */
+        }
+
+
+        .code-example {
+            background-color: #282c34;
+            color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.1em; 
+            width: 100%; 
+            max-width: 700px; 
+            align-self: center; 
+        }
+
+        .code-example .output {
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            min-height: 40px;
+            white-space: pre-wrap;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px; 
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.3em; 
+            margin-top: 25px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 123, 255, 0.4);
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.6);
+        }
+
+        .next-slide, .prev-slide {
+            position: absolute;
+            bottom: 30px; 
+        }
+
+        .next-slide { right: 30px; }
+        .prev-slide { left: 30px; background-color: #6c757d; }
+        .prev-slide:hover { background-color: #5a6268; }
+
+        .start-button {
+            display: block !important;
+            position: absolute;
+            right: 30px;
+            bottom: 30px;
+        }
+
+        /* Estilos de Quiz */
+        .quiz-options {
+            list-style: none;
+            padding: 0;
+            width: 90%; 
+            max-width: 750px;
+            margin: 30px auto 0 auto;
+        }
+
+        .quiz-options li {
+            font-size: 1.25em; 
+            padding: 18px;
+            margin-bottom: 12px;
+            border-radius: 10px;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            text-align: left;
+        }
+        
+        .quiz-options li.interactive {
+             background-color: #f8f9fa;
+             border: 1px solid #dee2e6;
+             cursor: pointer;
+        }
+
+        .quiz-options li.interactive:hover {
+            background-color: #e9ecef;
+            border-color: #007bff;
+        }
+
+        .quiz-options li.correct {
+            background-color: #d4edda !important;
+            border-color: #28a745 !important;
+            color: #155724;
+            font-weight: 600;
+            pointer-events: none !important;
+        }
+
+        .quiz-options li.incorrect {
+            background-color: #f8d7da !important;
+            border-color: #dc3545 !important;
+            color: #721c24;
+            font-weight: 600;
+            pointer-events: none !important;
+        }
+        
+        .syntax-focus {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            width: 90%;
+            align-self: center;
+        }
+        .syntax-focus code {
+            color: #d84501;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .flowchart-placeholder {
+            margin-top: 25px;
+            width: 100%;
+            max-width: 600px;
+            align-self: center;
+            border: 1px dashed #007bff;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .flowchart-placeholder img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-height: 45vh; /* Límite de altura para no exceder la slide */
+            object-fit: contain;
+        }
+        
+        /* Estilo para los bloques de texto sin viñetas */
+        .plain-text-block {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #f0f8ff;
+            border-left: 5px solid #007bff;
+            border-radius: 5px;
+            text-align: left;
+            width: 90%;
+            align-self: center;
+        }
+
+        .plain-text-block p {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        
+        /* Estilos para el Reto Final */
+        #slide20_reto h2 {
+            font-size: 3em;
+            color: #e73c7e;
+        }
+        #slide20_reto h3 {
+            font-size: 2em;
+            color: #23a6d5;
+        }
+        #slide20_reto p {
+            max-width: 800px;
+            margin-top: 20px;
+        }
+        
+        /* Estilos adicionales para la analogía (MEJORA DE DISEÑO CAJAS) */
+        .analogy-box .question {
+            font-style: italic;
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div id="presentation-container">
+
+        
+<section id="slide1" class="slide active">
+            <h1>¡Hola, Futuros Creadores!</h1>
+            <h2>Principios de Programación: Tu Viaje Comienza Aquí</h2>
+            <p class="question">¿Cuál es el proceso más aburrido y repetitivo que haces todos los días? ¿Cómo sería si una máquina pudiera hacerlo por ti?</p>
+            <button class="next-slide start-button">Empezar</button>
+        </section>
+
+        
+<section id="slide2" class="slide" data-time="2:00 min. (Enganche)">
+            <h1>Programar es...</h1>
+            <p>Convertir un proceso humano (lógico y complejo) en una <b>secuencia de instrucciones precisas</b> que una máquina puede ejecutar (un algoritmo).</p>
+            <div class="analogy-box">
+                <h3>Analogía del Chef</h3>
+                <p>La programación es como escribir una receta (instrucciones) muy detallada para que un ayudante (la computadora) prepare el plato (el resultado).</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button>
+        </section>
+        
+        
+<section id="slide_algoritmo_intro" class="slide" data-time="1:30 min. (Algoritmo)">
+            <h1>La Lógica del Programa: Algoritmos</h1>
+            <p>Un <b>Algoritmo</b> es un conjunto <b>ordenado y finito</b> de instrucciones que nos permite resolver un problema o realizar una tarea.</p>
+            
+            <div class="plain-text-block">
+                <p><b>Finito:</b> Debe terminar en algún momento. </p>
+                <p><b>Preciso:</b> Cada paso debe ser claro y sin ambigüedades.</p>
+                <p><b>Definido:</b> Si se sigue el mismo algoritmo con la misma entrada, siempre da el mismo resultado.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button>
+        </section>
+
+        
+<section id="slide_algoritmo_interact" class="slide" data-time="3:00 min. (Actividad)">
+            <h2>Actividad: Piensa como un Algoritmo</h2>
+            <p>Imaginemos que le escribimos el algoritmo a un robot para que se cepille los dientes.</p>
+            
+            <h3>Pregunta para el grupo:</h3>
+            <p>¿Cuáles son los pasos <b>exactos y ordenados</b> que el robot debe seguir, desde que está frente al lavamanos hasta que tiene la boca limpia?</p>
+            
+            <div class="analogy-box">
+                <p class="question">Piense en cada detalle: coger, abrir, mojar, poner... ¡No se salte ningún paso!</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Ver Solución</button>
+        </section>
+
+        
+<section id="slide_algoritmo_ejemplo" class="slide" data-time="1:30 min. (Ejemplo)">
+            <h2>Algoritmo: Cepillado de Dientes (Solución)</h2>
+            <p>Este es el algoritmo simple (solo secuencia, sin decisiones): </p>
+            <div class="analogy-box" style="text-align: left;">
+                <ol style="font-size: 1.1em; max-width: 600px; margin: auto;">
+                    <li>Coger cepillo.</li>
+                    <li>Coger pasta de dientes.</li>
+                    <li>Destapar pasta de dientes.</li>
+                    <li>Poner pasta en cepillo.</li>
+                    <li>Tapar pasta de dientes.</li>
+                    <li>Mojar cepillo (opcional).</li>
+                    <li>Cepillar dientes.</li>
+                    <li>Enjuagar cepillo.</li>
+                    <li>Enjuagar boca.</li>
+                </ol>
+                <p><b>Conclusión:</b> Un programa es solo una lista de estos pasos, pero escritos en <b>Sintaxis</b>.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button>
+        </section>
+        
+        
+<section id="slide_syntax_intro" class="slide" data-time="1:30 min. (Concepto Clave)">
+            <h1>El Idioma de las Máquinas: Sintaxis</h1>
+            <p>La <b>Sintaxis</b> son las reglas de gramática que debemos seguir para escribir código de forma correcta. Es el <b>"cómo"</b> se dicen las cosas.</p>
+            <div class="analogy-box">
+                <p>Si escribes "Casa azul" en español, es correcto. Si escribes "Azul casa", la sintaxis es incorrecta, aunque se entienda la idea.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button>
+        </section>
+
+        
+<section id="slide6_quiz_syntax" class="slide quiz-slide" data-time="1:00 min. (Quiz)">
+            <h2>¿Qué es la Sintaxis en programación?</h2>
+            <ul class="quiz-options" data-correct-answer="2">
+                <li class="interactive">El objetivo final del programa.</li>
+                <li class="interactive">La lógica para resolver un problema.</li>
+                <li class="interactive">Las reglas de gramática para escribir código correcto.</li>
+                <li class="interactive">El nombre que le damos a una variable.</li>
+            </ul>
+            <p class="quiz-feedback"></p>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide next-quiz-slide" disabled>Ver Respuesta</button>
+        </section>
+
+        
+<section id="slide7_answer_syntax" class="slide answer-slide" data-time="0:30 min. (Respuesta)">
+            <h2>Respuesta Correcta: ¡La <b>Sintaxis</b> son las reglas de gramática!</h2>
+            <div class="answer-explanation">
+                <p><b>Explicación:</b> Si rompes la sintaxis (ej. olvidas un paréntesis o un dos puntos), el programa mostrará un error (<code>Syntax Error</code>) y no se ejecutará.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button> 
+        </section>
+
+        
+<section id="slide8" class="slide" data-time="1:30 min. (Concepto)">
+            <h2>1. Hablando con la Computadora: `print()`</h2>
+            <p>Es la forma en que el programa <b>nos comunica</b> información (Salida).</p>
+            <div class="syntax-focus">
+                <h3>Sintaxis Clave de `print()`</h3>
+                <p><code>print( Contenido_a_Mostrar )</code></p>
+                <div class="plain-text-block">
+                    <p><b>Regla 1:</b> La palabra clave <code>print</code> debe ir en minúsculas.</p>
+                    <p><b>Regla 2:</b> El contenido debe ir <b>entre paréntesis</b> <code>( )</code>.</p>
+                    <p><b>Regla 3:</b> Si es texto (cadenas), debe ir <b>entre comillas</b> <code>" "</code> o <code>' '</code>.</p>
+                </div>
+            </div>
+            <div class="code-example">
+                <pre><code class="language-python">print("¡Mi primer mensaje!")</code></pre>
+                <button class="run-code" data-slide-id="slide8">Ejecutar</button>
+                <p class="output" id="output-slide8"></p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button>
+        </section>
+        
+        
+<section id="slide9_quiz_print" class="slide quiz-slide" data-time="1:00 min. (Quiz)">
+            <h2>¿Cuál de estas opciones tiene la sintaxis correcta en Python?</h2>
+            <ul class="quiz-options" data-correct-answer="0">
+                <li class="interactive"><code>print("Hola")</code></li>
+                <li class="interactive"><code>Print "Hola"</code></li>
+                <li class="interactive"><code>print hola</code></li>
+                <li class="interactive"><code>print["Hola"]</code></li>
+            </ul>
+            <p class="quiz-feedback"></p>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide next-quiz-slide" disabled>Ver Respuesta</button>
+        </section>
+
+        
+<section id="slide10_answer_print" class="slide answer-slide" data-time="0:30 min. (Respuesta)">
+            <h2>Respuesta Correcta: ¡<code>print("Hola")</code>!</h2>
+            <div class="answer-explanation">
+                <p><b>Explicación:</b> Se requiere la palabra clave en minúsculas (<code>print</code>) y los paréntesis obligatorios <code>()</code>. Las comillas son necesarias para el texto.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button> 
+        </section>
+        
+        
+<section id="slide11_variables" class="slide" data-time="1:30 min. (Concepto)">
+            <h2>2. Almacenando Información: Variables</h2>
+            <p>Una <b>Variable</b> es una caja etiquetada en la memoria que guarda un valor. Nos ayuda a recordar datos dentro del programa.</p>
+            <div class="syntax-focus">
+                <h3>Sintaxis Clave para Variables (Asignación)</h3>
+                <p><code>nombre_variable = valor</code></p>
+                <div class="plain-text-block">
+                    <p><b>Regla 1 (Asignación):</b> Se usa el signo <b>igual</b> (<code>=</code>) para guardar o asignar un valor.</p>
+                    <p><b>Regla 2 (Nombre):</b> El nombre de la variable no debe tener <b>espacios</b> (usa <code>_</code> o CamelCase).</p>
+                    <p><b>Regla 3 (Uso):</b> Puedes usar la variable con <code>print()</code> sin comillas para mostrar su valor.</p>
+                </div>
+            </div>
+            <div class="code-example">
+                <pre><code class="language-python">mi_nombre = "Juan"
+mi_edad = 25
+print(mi_nombre)</code></pre>
+                <button class="run-code" data-slide-id="slide11_variables">Ejecutar</button>
+                <p class="output" id="output-slide11_variables"></p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button>
+        </section>
+
+        
+<section id="slide12_quiz_variables" class="slide quiz-slide" data-time="1:00 min. (Quiz)">
+            <h2>¿Cuál de estas líneas es la sintaxis correcta para asignar un valor a una variable?</h2>
+            <ul class="quiz-options" data-correct-answer="0">
+                <li class="interactive"><code>precio_final = 19.99</code></li>
+                <li class="interactive"><code>mi edad = 30</code> (Contiene un espacio)</li>
+                <li class="interactive"><code>edad := 18</code></li>
+                <li class="interactive"><code>print (nombre = "Maria")</code></li>
+            </ul>
+            <p class="quiz-feedback"></p>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide next-quiz-slide" disabled>Ver Respuesta</button>
+        </section>
+
+        
+<section id="slide13_answer_variables" class="slide answer-slide" data-time="0:30 min. (Respuesta)">
+            <h2>Respuesta Correcta: ¡<code>precio_final = 19.99</code>!</h2>
+            <div class="answer-explanation">
+                <p><b>Explicación:</b> El nombre de la variable no tiene espacios (usa guion bajo <code>_</code>) y se utiliza el signo de asignación simple (<code>=</code>) para guardar el valor.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button> 
+        </section>
+        
+        
+<section id="slide14_input" class="slide" data-time="1:30 min. (Concepto)">
+            <h2>3. Obteniendo Datos: `input()` (Entrada)</h2>
+            <p>La función <b>`input()`</b> permite que el programa se detenga y espere a que el **usuario ingrese datos** desde el teclado. Siempre se usa para llenar una variable.</p>
+            <div class="syntax-focus">
+                <h3>Sintaxis Clave de `input()`</h3>
+                <p><code>variable = input("Mensaje al usuario")</code></p>
+                <div class="plain-text-block">
+                    <p><b>Regla 1:</b> El resultado de `input()` debe ser guardado en una <b>variable</b>.</p>
+                    <p><b>Regla 2:</b> El mensaje que se muestra al usuario va <b>entre comillas</b> y dentro de <b>paréntesis</b> <code>()</code>.</p>
+                </div>
+            </div>
+            <div class="code-example">
+                <pre><code class="language-python">nombre_usuario = input("¿Tu nombre? ")
+print("Hola, " + nombre_usuario)</code></pre>
+                <button class="run-code" data-slide-id="slide14_input">Ejecutar</button>
+                <p class="output" id="output-slide14_input"></p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button>
+        </section>
+
+        
+<section id="slide15_quiz_input" class="slide quiz-slide" data-time="1:00 min. (Quiz)">
+            <h2>¿Cuál es el propósito principal de la función `input()`?</h2>
+            <ul class="quiz-options" data-correct-answer="2">
+                <li class="interactive">Mostrar un mensaje en la pantalla.</li>
+                <li class="interactive">Asignar un valor fijo a una variable.</li>
+                <li class="interactive">Permitir que el usuario ingrese información al programa.</li>
+                <li class="interactive">Detener la ejecución del programa permanentemente.</li>
+            </ul>
+            <p class="quiz-feedback"></p>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide next-quiz-slide" disabled>Ver Respuesta</button>
+        </section>
+
+        
+<section id="slide16_answer_input" class="slide answer-slide" data-time="0:30 min. (Respuesta)">
+            <h2>Respuesta Correcta: ¡Permitir que el usuario ingrese información al programa!</h2>
+            <div class="answer-explanation">
+                <p><b>Explicación:</b> `input()` pausa la ejecución del código, le pide un dato al usuario y luego, con ese dato, continúa. Es la herramienta para la **Entrada** de datos.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button> 
+        </section>
+        
+        
+<section id="slide17_if" class="slide" data-time="2:00 min. (Concepto)">
+            <h2>4. ¡Tomando Decisiones! `if` (Condicionales)</h2>
+            <p>Permite que el programa <b>elija un camino u otro</b> basándose en una condición (Verdadero o Falso).</p>
+            <div class="syntax-focus">
+                <h3>Sintaxis Clave de `if`</h3>
+                <p><code>if condicion_a_evaluar:</code></p>
+                <p><code>&nbsp;&nbsp;&nbsp;&nbsp;codigo_si_es_verdadero</code></p>
+                <div class="plain-text-block">
+                    <p><b>Regla 1 (Final):</b> La condición termina obligatoriamente con <b>dos puntos</b> (<code>:</code>).</p>
+                    <p><b>Regla 2 (Bloque):</b> El código que se ejecuta si la condición es verdadera debe tener <b>indentación</b> (sangría).</p>
+                    <p><b>Regla 3 (Comparación):</b> Para verificar si dos valores son iguales, usamos <b>doble igual</b> (<code>==</code>).</p>
+                </div>
+            </div>
+            <div class="code-example">
+                <pre><code class="language-python">edad = 20
+if edad >= 18:
+    print("Acceso permitido")
+else:
+    print("Acceso denegado")</code></pre>
+                <button class="run-code" data-slide-id="slide17_if">Ejecutar</button>
+                <p class="output" id="output-slide17_if"></p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button>
+        </section>
+        
+        
+<section id="slide18_quiz_if" class="slide quiz-slide" data-time="1:00 min. (Quiz)">
+            <h2>¿Qué elemento de sintaxis es obligatorio al final de una línea `if` en Python?</h2>
+            <ul class="quiz-options" data-correct-answer="1">
+                <li class="interactive">Un punto y coma (<code>;</code>).</li>
+                <li class="interactive">Dos puntos (<code>:</code>).</li>
+                <li class="interactive">Un paréntesis de cierre (<code>)</code>).</li>
+                <li class="interactive">Un signo de interrogación (<code>?</code>).</li>
+            </ul>
+            <p class="quiz-feedback"></p>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide next-quiz-slide" disabled>Ver Respuesta</button>
+        </section>
+
+        
+<section id="slide19_answer_if" class="slide answer-slide" data-time="0:30 min. (Respuesta)">
+            <h2>Respuesta Correcta: ¡Dos puntos (<code>:</code>)!</h2>
+            <div class="answer-explanation">
+                <p><b>Explicación:</b> Los dos puntos (<code>:</code>) le indican a Python que lo que sigue es un "bloque" de código que pertenece a la estructura <code>if</code>. Este bloque debe estar indentado.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Siguiente</button> 
+        </section>
+
+        
+<section id="slide20_reto" class="slide" data-time="2:00 min. (Reto)">
+            <h2>🎯 ¡Reto Final!</h2>
+            <h3>Crea un Sistema de Acceso con Contraseña</h3>
+            <p>Queremos un programa que proteja un recurso secreto. Necesitas combinar todo lo aprendido:</p>
+            
+            <div class="plain-text-block">
+                <p>1. **Guardar** una contraseña secreta (Variable).</p>
+                <p>2. **Preguntar** al usuario la contraseña (Input).</p>
+                <p>3. **Decidir** si la contraseña ingresada es correcta (If/Condicional).</p>
+                <p>4. **Comunicar** el resultado: "Acceso Permitido" o "Acceso Denegado" (Print).</p>
+            </div>
+            
+            <h3>¿Cuál sería el <b>Algoritmo (los pasos lógicos)</b> para lograr esto?</h3>
+            <p>Toma un momento para escribir la secuencia de pasos que le darías a la computadora.</p>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Ver el Diagrama de Flujo</button>
+        </section>
+
+        
+<section id="slide21_flowchart" class="slide" data-time="1:30 min. (Diagrama)">
+            <h2>Lógica Visual: El Diagrama de Flujo</h2>
+            <p>Un Diagrama de Flujo nos ayuda a ver la lógica del algoritmo antes de programar.</p>
+            
+            <div class="flowchart-placeholder">
+                <img src="diagrama_acceso.png" alt="Diagrama de Flujo del Sistema de Acceso con Contraseña (Input/Decisión)" />
+            </div>
+            
+            <div class="plain-text-block">
+                <p>Cada forma representa una acción: óvalos (inicio/fin), paralelogramos (entrada/salida), rectángulos (proceso) y diamantes (decisión).</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">¡A Programar!</button>
+        </section>
+
+
+        
+<section id="slide22_programar" class="slide" data-time="2:30 min. (Programación)">
+            <h1>⌨️ ¡Listos para Programar!</h1>
+            <h3>Tu misión es escribir el código en Python siguiendo el Algoritmo.</h3>
+            
+            <div class="plain-text-block" style="width: 70%;">
+                <p>🔗 **Editor Online Sugerido:** Puedes usar un editor en línea como <a href="https://replit.com/languages/python3" target="_blank">Replit</a> o <a href="https://www.programiz.com/python-programming/online-compiler/" target="_blank">Programiz Python Online</a>.</p>
+                <p style="font-weight: bold; margin-top: 15px;">Tips de Sintaxis:</p>
+                <ul>
+                    <li>Guarda tu clave secreta: `clave = "..."`</li>
+                    <li>Pide el intento: `intento = input("Ingresa clave: ")`</li>
+                    <li>Para comparar (Decisión), usa: `if intento == clave:`</li>
+                </ul>
+            </div>
+            
+            <p style="margin-top: 40px; font-weight: 600;">¡Usa tu lógica, respeta la sintaxis y verás la magia!</p>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Ver Conclusión</button>
+        </section>
+
+        
+<section id="slide23_conclusion" class="slide" data-time="2:30 min. (Cierre)">
+            <h1>¡Lo Lograste!</h1>
+            <h2>Mensajes Clave para Recordar:</h2>
+            <div class="plain-text-block" style="width: 70%; text-align: center;">
+                <p>Programar es: <b>Algoritmo</b> (Lógica) y <b>Sintaxis</b> (Reglas).</p>
+                <p>Hemos aprendido a <b>Comunicarnos</b> (<code>print</code>), <b>Recordar</b> (Variables), <b>Obtener Datos</b> (<code>input</code>) y <b>Decidir</b> (<code>if</code>).</p>
+            </div>
+            <div class="call-to-action">
+                <h3>Sigue Explorando:</h3>
+                <p>Plataformas como <a href="https://scratch.mit.edu/" target="_blank">Scratch</a> o <a href="https://code.org/learn" target="_blank">Code.org</a>.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+            <button class="next-slide">Ver Referencias</button>
+        </section>
+
+        
+<section id="slide24_references" class="slide" data-time="Extra (APA)">
+            <h1>Referencias y Recursos (Normas APA)</h1>
+            <p>El contenido de esta clase se basa en principios fundamentales de la informática y pedagogía del pensamiento computacional.</p>
+            <div class="plain-text-block" style="text-align: left;">
+                <p>Guzdial, M. (2015). <i>Learner-Centered Design of Computing Education: Research on Computing and Learning</i>. Morgan & Claypool Publishers.</p>
+                <p>Wing, J. M. (2006). Computational Thinking. <i>Communications of the ACM, 49</i>(3), 33-35.</p>
+                <p>Python Software Foundation. (s.f.). <i>The Python Tutorial</i>. (Referencia a la sintaxis básica: print, input, if).</p>
+                <p>Creative Commons (s.f.). <i>Scratch</i> (Versión 3.0) [Software]. Cambridge, MA: Massachusetts Institute of Technology.</p>
+            </div>
+            <button class="prev-slide">Anterior</button>
+        </section>
+
+    </div>
+
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+
+    <script>
+        /* JavaScript Integrado */
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            let currentSlideIndex = 0;
+
+            // Mapeo de índices de Quiz (pregunta) a Respuesta
+            const quizAnswerMap = {
+                6: 7,   
+                9: 10,  
+                12: 13, 
+                15: 16, 
+                18: 19  
+            };
+            
+            function resetQuiz(quizIndex) {
+                const quizSlide = slides[quizIndex];
+                const ul = quizSlide.querySelector('.quiz-options');
+                const feedbackElement = quizSlide.querySelector('.quiz-feedback');
+                let nextButton = quizSlide.querySelector('.next-quiz-slide');
+
+                if (ul) {
+                    ul.querySelectorAll('li').forEach(li => {
+                        li.classList.remove('correct', 'incorrect');
+                        li.classList.add('interactive');
+                        li.style.pointerEvents = 'auto'; 
+                    });
+                }
+                if (feedbackElement) feedbackElement.textContent = "";
+
+                if (nextButton) {
+                    const newNextButton = nextButton.cloneNode(true);
+                    newNextButton.disabled = true;
+                    nextButton.parentNode.replaceChild(newNextButton, nextButton);
+                    return newNextButton; 
+                }
+                return null;
+            }
+            
+            function showSlide(index, direction = 'next') {
+                const outgoingSlideIndex = currentSlideIndex;
+
+                slides.forEach((slide, i) => {
+                    if (i === index) {
+                        slide.classList.add('active');
+                        slide.classList.remove('prev-exit', 'next-exit'); 
+                        
+                        if (slide.classList.contains('quiz-slide')) {
+                            const newNextButton = resetQuiz(i);
+                            if (newNextButton) {
+                                setupQuiz(i, newNextButton);
+                            }
+                        }
+                        
+                    } else {
+                        if (slide.classList.contains('active')) {
+                            if (direction === 'next') {
+                                slide.classList.add('next-exit');
+                            } else {
+                                slide.classList.add('prev-exit');
+                            }
+                        }
+                        slide.classList.remove('active');
+                        
+                        if (direction === 'prev' && Object.values(quizAnswerMap).includes(outgoingSlideIndex)) {
+                            const quizIndex = Object.keys(quizAnswerMap).find(key => quizAnswerMap[key] == outgoingSlideIndex);
+                            if (quizIndex) {
+                                resetQuiz(parseInt(quizIndex));
+                            }
+                        }
+                    }
+                });
+                currentSlideIndex = index;
+                updateNavigationButtons(); 
+            }
+
+            function setupQuiz(quizIndex, nextButton) {
+                 const quizSlide = slides[quizIndex];
+                 const ul = quizSlide.querySelector('.quiz-options');
+                 const correctIndex = parseInt(ul.dataset.correctAnswer);
+                 const feedbackElement = quizSlide.querySelector('.quiz-feedback');
+
+                 ul.querySelectorAll('li.interactive').forEach((li, index) => {
+                     li.addEventListener('click', function handler() {
+                         ul.querySelectorAll('li').forEach(item => {
+                             item.classList.remove('interactive');
+                             item.style.pointerEvents = 'none';
+                         });
+                         
+                         nextButton.disabled = false;
+                         
+                         if (index === correctIndex) {
+                             li.classList.add('correct');
+                             feedbackElement.textContent = "¡Correcto! Bien hecho.";
+                             feedbackElement.style.color = '#28a745';
+                         } else {
+                             li.classList.add('incorrect');
+                             ul.querySelectorAll('li')[correctIndex].classList.add('correct');
+                             feedbackElement.textContent = "Incorrecto. La solución es la opción marcada en verde.";
+                             feedbackElement.style.color = '#dc3545';
+                         }
+                         
+                         const answerSlideIndex = quizAnswerMap[quizIndex];
+                         nextButton.addEventListener('click', () => { 
+                             showSlide(answerSlideIndex, 'next'); 
+                         }, { once: true });
+                         
+                         li.removeEventListener('click', handler);
+                     });
+                 });
+            }
+
+            function updateNavigationButtons() {
+                // Navegación Anterior (siempre visible salvo en slide 0)
+                document.querySelectorAll('.prev-slide').forEach(button => {
+                    button.style.display = (currentSlideIndex === 0) ? 'none' : 'block';
+                });
+                
+                // Navegación Siguiente (general)
+                slides.forEach((slide, i) => {
+                    const nextGeneralButton = slide.querySelector('.next-slide:not(.next-quiz-slide)');
+                    const isAnswerSlide = Object.values(quizAnswerMap).includes(i);
+                    const isQuizSlide = slide.classList.contains('quiz-slide');
+
+                    if (nextGeneralButton) {
+                        if (i === currentSlideIndex) {
+                            // Mostrar si es la primera, una respuesta, el reto, o un slide normal.
+                            if (i === 0 || isAnswerSlide || i === slides.length - 1 || i === 20 || i === 21 || i === 22) {
+                                nextGeneralButton.style.display = 'block';
+                            } else if (isQuizSlide) {
+                                nextGeneralButton.style.display = 'none';
+                            } else {
+                                nextGeneralButton.style.display = 'block';
+                            }
+                        } else {
+                            nextGeneralButton.style.display = 'none';
+                        }
+                    }
+                });
+                
+                // Botón "Ver Respuesta" (solo visible en quiz-slide)
+                slides.forEach((slide, i) => {
+                    const nextQuizButton = slide.querySelector('.next-quiz-slide');
+                    if (nextQuizButton) {
+                        nextQuizButton.style.display = (i === currentSlideIndex) ? 'block' : 'none';
+                    }
+                });
+            }
+
+            function goToNextSlide() {
+                if (currentSlideIndex < slides.length - 1) {
+                    showSlide(currentSlideIndex + 1, 'next');
+                }
+            }
+
+            function goToPrevSlide() {
+                if (currentSlideIndex > 0) {
+                    showSlide(currentSlideIndex - 1, 'prev');
+                }
+            }
+
+            // --- Listener para navegación general ---
+            document.querySelectorAll('.next-slide:not(.next-quiz-slide)').forEach(button => {
+                button.addEventListener('click', goToNextSlide);
+            });
+
+            document.querySelectorAll('.prev-slide').forEach(button => {
+                button.addEventListener('click', goToPrevSlide);
+            });
+            
+            // Navegación con teclado (flechas)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    const currentSlide = slides[currentSlideIndex];
+                    const nextQuizButton = currentSlide.querySelector('.next-quiz-slide');
+                    
+                    if (currentSlide.classList.contains('quiz-slide')) {
+                        if (nextQuizButton && !nextQuizButton.disabled) {
+                            nextQuizButton.click();
+                            return;
+                        }
+                        return;
+                    }
+                    
+                    if (Object.values(quizAnswerMap).includes(currentSlideIndex)) {
+                        goToNextSlide();
+                        return;
+                    }
+                    
+                    goToNextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    goToPrevSlide();
+                }
+            });
+
+            // --- Simulación de Ejecución de Código Python (Simplificado) ---
+            document.querySelectorAll('.run-code').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const slideId = event.target.dataset.slideId;
+                    const outputElement = document.getElementById(`output-${slideId}`);
+                    const codeElement = event.target.closest('.code-example').querySelector('code');
+                    const code = codeElement.textContent.trim();
+
+                    let simulatedOutput = "";
+                    let simulatedInput = "";
+
+                    if (code.includes('input(')) {
+                        simulatedInput = await new Promise(resolve => {
+                            let inputVal = prompt("Se necesita una entrada. Por favor, introduce un valor:");
+                            resolve(inputVal);
+                        });
+                        if (simulatedInput === null) { 
+                            outputElement.textContent = "Output: Ejecución cancelada por el usuario.";
+                            return;
+                        }
+                    }
+
+                    // Lógica de simulación 
+                    if (slideId === 'slide8') { 
+                        simulatedOutput = "¡Mi primer mensaje!";
+                    } else if (slideId === 'slide11_variables') {
+                        simulatedOutput = "Juan";
+                    } else if (slideId === 'slide14_input') { 
+                        const name = simulatedInput || "Programador"; 
+                        simulatedOutput = `Hola, ${name}!`;
+                    } else if (slideId === 'slide17_if') {
+                        const age = 20;
+                        if (age >= 18) {
+                            simulatedOutput = "Acceso permitido";
+                        } else {
+                            simulatedOutput = "Acceso denegado";
+                        }
+                    } else {
+                        simulatedOutput = "Output por defecto: [OK]";
+                    }
+
+                    outputElement.textContent = `Output:\n${simulatedOutput}`;
+                });
+            });
+
+
+            // Inicializar la primera slide
+            showSlide(0);
+        });
+    </script>
+</body>
+</html>
